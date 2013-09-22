@@ -5,8 +5,10 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.*;
+import android.net.Uri;
 import android.net.wifi.WpsInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
@@ -220,6 +222,7 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
     }
 
     private void showHex(int id, WiFiP2pService service) {
+
         if (id==1) {
             mPeerHex1.setVisibility(View.VISIBLE);
         } else if (id==2) {
@@ -442,10 +445,23 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
                     String data = splitStr[3];
                     Log.d(TAG, "just got HTML data from "+from+": "+data);
 
+                    File f = new File(getApplicationContext().getFilesDir(), "index.html");
                     if (meta.equals("GET") && !urlreq.equals("_")) {
                         new DownloadWebsiteTask(from, urlreq, meta, data).execute(urlreq);
                     } else if (meta.equals("RESP")) {
 
+                        try {
+                            FileWriter out = new FileWriter(f);
+                            out.write(data);
+                            out.close();
+                        } catch (IOException e) {
+                            Log.d(TAG, "IOException, "+e);
+                        }
+
+                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                        Uri uridata = Uri.parse(f.getAbsolutePath());
+                        intent.setData(uridata);
+                        startActivity(intent);
                     }
                 }
 

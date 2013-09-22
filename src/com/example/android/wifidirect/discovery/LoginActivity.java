@@ -8,8 +8,7 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.*;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -59,7 +58,7 @@ public class LoginActivity extends Activity {
         Uri uri = getPhotoUri(Long.parseLong(contactId));
         badge.assignContactUri(uri);
         final Bitmap bitmap = loadContactPhoto(getContentResolver(), Long.parseLong(contactId));
-        badge.setImageBitmap(bitmap);
+        badge.setImageBitmap(getCroppedBitmap(bitmap));
         //End Crazy Photo Trick
 //        badge.setImageURI(Uri.parse(ContactsContract.Profile.PHOTO_URI));
 //
@@ -71,7 +70,7 @@ public class LoginActivity extends Activity {
             accountList.add(accounts[i].name);
         }
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_1, android.R.id.text1, accountList);
+                android.R.layout.simple_selectable_list_item, android.R.id.text1, accountList);
         ListView accountListView = (ListView) findViewById(R.id.accountlist);
         accountListView.setAdapter(adapter);
         accountListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -85,11 +84,32 @@ public class LoginActivity extends Activity {
                 Intent i = new Intent(getApplicationContext(), WiFiServiceDiscoveryActivity.class);
                 i.putExtra("username", username);
                 i.putExtra("badge", bitmap);
-                Log.d("wifidirectdemo", "bitmap on login activity is "+bitmap);
                 startActivity(i);
             }
         });
 
+    }
+
+    public Bitmap getCroppedBitmap(Bitmap bitmap) {
+        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
+                bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(output);
+
+        final int color = 0xff424242;
+        final Paint paint = new Paint();
+        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+
+        paint.setAntiAlias(true);
+        canvas.drawARGB(0, 0, 0, 0);
+        paint.setColor(color);
+        // canvas.drawRoundRect(rectF, roundPx, roundPx, paint);
+        canvas.drawCircle(bitmap.getWidth() / 2, bitmap.getHeight() / 2,
+                bitmap.getWidth() / 2, paint);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawBitmap(bitmap, rect, rect, paint);
+        //Bitmap _bmp = Bitmap.createScaledBitmap(output, 60, 60, false);
+        //return _bmp;
+        return output;
     }
 
     @Override
