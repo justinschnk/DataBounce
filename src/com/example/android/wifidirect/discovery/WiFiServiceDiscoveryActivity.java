@@ -101,8 +101,14 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
     RotateAnimation rotate;
     RotateAnimation rotatePeer;
 
+    TextView profileTextView;
+    ImageView profileImageView;
+    GridLayout profileLayout;
+
+
     Bitmap badge;
     String username;
+    boolean internet;
 
     private final static int INITIAL_STATE = 0;
     private final static int SEARCH_STATE = 1;
@@ -163,6 +169,7 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
         
         username = getIntent().getStringExtra("username");
 
+
         WiFiP2pService wiFiP2pService = new WiFiP2pService();
         WifiP2pDevice dev = new WifiP2pDevice();
         dev.deviceName = "raytray25";
@@ -190,6 +197,22 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
         dev.deviceAddress = "4";
         wiFiP2pService4.device = dev;
         addNeighborHex(wiFiP2pService4);
+
+
+        internet = getIntent().getBooleanExtra("internet",false);
+
+        profileTextView = (TextView) findViewById(R.id.profile_title);
+        profileTextView.setText(username);
+        profileImageView = (ImageView) findViewById(R.id.profile_image);
+        profileImageView.setImageBitmap(getCroppedBitmap(badge));
+        profileLayout = (GridLayout) findViewById(R.id.profile_layout);
+
+
+
+        //if(internet){
+            profileLayout.setVisibility(View.VISIBLE);
+            profileLayout.bringToFront();
+        //}
     }
 
     public void hexClicked(View v) {

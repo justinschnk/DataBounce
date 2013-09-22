@@ -170,6 +170,14 @@ public class LoginActivity extends Activity {
     }
 
     private class RegisterNewUser extends AsyncTask {
+        Intent aIntent;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            aIntent = intent;
+        }
+
         @Override
         protected Void doInBackground(Object... params) {
             DefaultHttpClient httpclient = new DefaultHttpClient();
@@ -183,15 +191,15 @@ public class LoginActivity extends Activity {
                 //int statusCode = response.getStatusLine().getStatusCode();
                 String responseContent = EntityUtils.toString(response.getEntity());
                 if (responseContent != null && !responseContent.equals("")) {   //&& !responseContent.contains("\"Error\": \"User with name ")
-                    intent.putExtra("internet",true);
+                    aIntent.putExtra("internet",true);
                 } else {
-                    intent.putExtra("internet",false);
+                    aIntent.putExtra("internet",false);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-                intent.putExtra("internet",false);
+                aIntent.putExtra("internet",false);
             }
-            startActivity(intent);
+            startActivity(aIntent);
             return null;
         }
 
