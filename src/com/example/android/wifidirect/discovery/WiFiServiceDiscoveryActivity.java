@@ -101,8 +101,14 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
     ImageView mMainHexImg;
     RotateAnimation rotate;
 
+    TextView profileTextView;
+    ImageView profileImageView;
+    GridLayout profileLayout;
+
+
     Bitmap badge;
     String username;
+    boolean internet;
 
     private final static int INITIAL_STATE = 0;
     private final static int SEARCH_STATE = 1;
@@ -162,6 +168,21 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
         Log.d(TAG, "bitmap is "+badge);
         
         username = getIntent().getStringExtra("username");
+
+        internet = getIntent().getBooleanExtra("internet",false);
+
+        profileTextView = (TextView) findViewById(R.id.profile_title);
+        profileTextView.setText(username);
+        profileImageView = (ImageView) findViewById(R.id.profile_image);
+        profileImageView.setImageBitmap(getCroppedBitmap(badge));
+        profileLayout = (GridLayout) findViewById(R.id.profile_layout);
+
+
+
+        //if(internet){
+            profileLayout.setVisibility(View.VISIBLE);
+            profileLayout.bringToFront();
+        //}
     }
 
     public void hexClicked(View v) {
