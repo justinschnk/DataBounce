@@ -37,6 +37,7 @@ public class LoginActivity extends Activity {
     ProgressBar progressSpinner;
     Account user;
     String username;
+    Intent intent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,10 +83,12 @@ public class LoginActivity extends Activity {
                 progressSpinner.setVisibility(View.VISIBLE);
                 // new CheckInternet().execute(null, null, null);
 
-                Intent i = new Intent(getApplicationContext(), WiFiServiceDiscoveryActivity.class);
-                i.putExtra("username", username);
-                i.putExtra("badge", bitmap);
-                startActivity(i);
+                intent = new Intent(getApplicationContext(), WiFiServiceDiscoveryActivity.class);
+                intent.putExtra("username", username);
+                intent.putExtra("badge", bitmap);
+                //Check Internet by making a "new profile" everytime (since this doesn't actually hurt existing profiles
+                new RegisterNewUser().execute();
+//                startActivity(i);
             }
         });
 
@@ -117,6 +120,7 @@ public class LoginActivity extends Activity {
     protected void onResume() {
         super.onResume();
     }
+
 
     private class CheckInternet extends AsyncTask<URL, Integer, Long> {
         String feedback = "";
@@ -178,16 +182,16 @@ public class LoginActivity extends Activity {
                 response = httpclient.execute(httppost);
                 //int statusCode = response.getStatusLine().getStatusCode();
                 String responseContent = EntityUtils.toString(response.getEntity());
-                if (responseContent != null && !responseContent.equals("") && !responseContent.contains("\"Error\": \"User with name ")) {
-                    Intent i = new Intent(getApplicationContext(), ProfileActivity.class);
-                    i.putExtra("username", username);
-                    startActivity(i);
+                if (responseContent != null && !responseContent.equals("")) {   //&& !responseContent.contains("\"Error\": \"User with name ")
+                    intent.putExtra("internet",true);
                 } else {
-
+                    intent.putExtra("internet",false);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
+                intent.putExtra("internet",false);
             }
+            startActivity(intent);
             return null;
         }
 
