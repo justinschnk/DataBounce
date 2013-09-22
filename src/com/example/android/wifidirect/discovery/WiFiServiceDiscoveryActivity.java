@@ -103,12 +103,14 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
     RotateAnimation rotatePeer;
 
     TextView profileTextView;
-    ImageView profileImageView;
+    //ImageView profileImageView;
+    TextView profileEmailTextView;
     GridLayout profileLayout;
 
 
     Bitmap badge;
     String username;
+    String email;
     boolean internet;
 
     private final static int INITIAL_STATE = 0;
@@ -169,23 +171,25 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
         Log.d(TAG, "bitmap is "+badge);
         
         username = getIntent().getStringExtra("username");
-
+        email = getIntent().getStringExtra("email");
 
 
         internet = getIntent().getBooleanExtra("internet",false);
 
         profileTextView = (TextView) findViewById(R.id.profile_title);
         profileTextView.setText(username);
-        profileImageView = (ImageView) findViewById(R.id.profile_image);
-        profileImageView.setImageBitmap(getCroppedBitmap(badge));
+//        profileImageView = (ImageView) findViewById(R.id.profile_image);
+//        profileImageView.setImageBitmap(getCroppedBitmap(badge));
+//        profileEmailTextView = (TextView) findViewById(R.id.profile_email);
+//        profileEmailTextView.setText(email);
         profileLayout = (GridLayout) findViewById(R.id.profile_layout);
 
 
 
-        //if(internet){
+        if(internet){
             profileLayout.setVisibility(View.VISIBLE);
             profileLayout.bringToFront();
-        //}
+        }
     }
 
     public void hexClicked(View v) {

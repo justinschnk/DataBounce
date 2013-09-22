@@ -85,6 +85,7 @@ public class LoginActivity extends Activity {
 
                 intent = new Intent(getApplicationContext(), WiFiServiceDiscoveryActivity.class);
                 intent.putExtra("username", username);
+                intent.putExtra("email", user.name);
                 intent.putExtra("badge", bitmap);
                 //Check Internet by making a "new profile" everytime (since this doesn't actually hurt existing profiles
                 new RegisterNewUser().execute();
@@ -182,7 +183,7 @@ public class LoginActivity extends Activity {
         protected Void doInBackground(Object... params) {
             DefaultHttpClient httpclient = new DefaultHttpClient();
             HttpPost httppost = new HttpPost("http://ec2-54-242-29-177.compute-1.amazonaws.com:5000/users/");
-            httppost.getParams().setParameter("name",username);
+            httppost.getParams().setParameter("username",username);
             httppost.getParams().setParameter("email",user.name);
             httppost.getParams().setParameter("is_proxy","false");
             HttpResponse response = null;
