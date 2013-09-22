@@ -530,7 +530,7 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
         });
     }
 
-    private final static String DELIMETER = "7227227227";
+    private final static String DELIMETER = "```";
     @Override
     public boolean handleMessage(Message msg) {
         switch (msg.what) {
