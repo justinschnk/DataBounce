@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+
+    <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/main_hex_rel"
+            android:layout_marginTop="-60dp"
+            android:layout_centerHorizontal="true"
+            android:onClick="hexClicked">
+        <ImageView
+                android:layout_margin="40dp"
+                android:id="@+id/main_hex"
+                android:layout_width="180dp"
+                android:layout_height="160dp"
+                android:background="@drawable/hexplain"
+                android:layout_centerInParent="true"
+                />
+        <TextView
+                android:id="@+id/internet_txt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="GO ONLINE!"
+                style="@android:style/TextAppearance.Holo.Large.Inverse"
+                android:layout_centerInParent="true"
+                />
+    </RelativeLayout>
+</RelativeLayout>

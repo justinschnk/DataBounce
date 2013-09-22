@@ -23,6 +23,12 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.RotateAnimation;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.android.wifidirect.discovery.WiFiChatFragment.MessageTarget;
@@ -30,6 +36,7 @@ import com.example.android.wifidirect.discovery.WiFiDirectServicesList.DeviceCli
 import com.example.android.wifidirect.discovery.WiFiDirectServicesList.WiFiDevicesAdapter;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -72,6 +79,18 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
 
     private TextView statusTxtView;
 
+    RelativeLayout mMainHex;
+    RelativeLayout mPeerHex1;
+    RelativeLayout mPeerHex2;
+    RelativeLayout mPeerHex3;
+    RelativeLayout mPeerHex4;
+    ImageView mMainHexImg;
+    RotateAnimation rotate;
+
+    private final static int INITIAL_STATE = 0;
+    private final static int SEARCH_STATE = 0;
+    int mState = INITIAL_STATE;
+
     public Handler getHandler() {
         return handler;
     }
@@ -102,6 +121,65 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
         getFragmentManager().beginTransaction()
                 .add(R.id.container_root, servicesList, "services").commit();
 
+
+        mMainHex = (RelativeLayout) findViewById(R.id.main_hex_rel);
+        mMainHexImg = (ImageView) findViewById(R.id.main_hex);
+
+        rotate = new RotateAnimation(0, 360, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+        rotate.setInterpolator(new LinearInterpolator());
+        rotate.setDuration(1000);
+        rotate.setRepeatCount(Animation.INFINITE);
+        mMainHexImg.startAnimation(rotate);
+
+    }
+
+    public void hexClicked(View v) {
+        // Move the hex to the center
+        if (mState == INITIAL_STATE) {
+            mMainHexImg.setAnimation(null);
+            Animation centerAnim = AnimationUtils.loadAnimation(this, R.anim.center);
+            v.startAnimation(centerAnim);
+            v.setClickable(false);
+            mState = SEARCH_STATE;
+        }
+    }
+
+    ArrayList<WiFiP2pService> serviceArrayList = new ArrayList<WiFiP2pService>();
+    public void addNeighborHex(WiFiP2pService service) {
+        if (!serviceArrayList.contains(service)) {
+            serviceArrayList.add(service);
+        }
+
+        if (mState == SEARCH_STATE) {
+            updateNeighborHexes();
+        }
+    }
+
+    private void updateNeighborHexes() {
+        hideAllHexes();
+        for (int i=0; i<serviceArrayList.size(); i++) {
+            WiFiP2pService service = serviceArrayList.get(i);
+            showHex(i+1, service);
+        }
+    }
+
+    private void showHex(int id, WiFiP2pService service) {
+        if (id==1) {
+            mPeerHex1.setVisibility(View.VISIBLE);
+        } else if (id==2) {
+            mPeerHex2.setVisibility(View.VISIBLE);
+        } else if (id==3) {
+            mPeerHex3.setVisibility(View.VISIBLE);
+        } else if (id==4) {
+            mPeerHex4.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void hideAllHexes() {
+        mPeerHex1.setVisibility(View.INVISIBLE);
+        mPeerHex2.setVisibility(View.INVISIBLE);
+        mPeerHex3.setVisibility(View.INVISIBLE);
+        mPeerHex4.setVisibility(View.INVISIBLE);
     }
 
     @Override
@@ -181,14 +259,14 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
                             WiFiDirectServicesList fragment = (WiFiDirectServicesList) getFragmentManager()
                                     .findFragmentByTag("services");
                             if (fragment != null) {
-                                WiFiDevicesAdapter adapter = ((WiFiDevicesAdapter) fragment
-                                        .getListAdapter());
+                                WiFiDevicesAdapter adapter = ((WiFiDevicesAdapter) fragment.getListAdapter());
                                 WiFiP2pService service = new WiFiP2pService();
                                 service.device = srcDevice;
                                 service.instanceName = instanceName;
                                 service.serviceRegistrationType = registrationType;
                                 adapter.add(service);
                                 adapter.notifyDataSetChanged();
+                                addNeighborHex(service);
                                 Log.d(TAG, "onBonjourServiceAvailable "
                                         + instanceName);
                             }
