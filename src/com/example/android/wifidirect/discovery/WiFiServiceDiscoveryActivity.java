@@ -3,10 +3,8 @@ package com.example.android.wifidirect.discovery;
 
 import android.app.Activity;
 import android.app.Fragment;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.*;
+import android.database.Cursor;
 import android.graphics.*;
 import android.net.Uri;
 import android.net.wifi.WpsInfo;
@@ -25,6 +23,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -100,6 +99,7 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
     RelativeLayout mPeerHex4;
     ImageView mMainHexImg;
     RotateAnimation rotate;
+    RotateAnimation rotatePeer;
 
     Bitmap badge;
     String username;
@@ -162,6 +162,34 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
         Log.d(TAG, "bitmap is "+badge);
         
         username = getIntent().getStringExtra("username");
+
+        WiFiP2pService wiFiP2pService = new WiFiP2pService();
+        WifiP2pDevice dev = new WifiP2pDevice();
+        dev.deviceName = "raytray25";
+        dev.deviceAddress = "1";
+        wiFiP2pService.device = dev;
+        addNeighborHex(wiFiP2pService);
+
+        WiFiP2pService wiFiP2pService2 = new WiFiP2pService();
+        dev = new WifiP2pDevice();
+        dev.deviceName = "marisa";
+        dev.deviceAddress = "2";
+        wiFiP2pService2.device = dev;
+        addNeighborHex(wiFiP2pService2);
+
+        WiFiP2pService wiFiP2pService3 = new WiFiP2pService();
+        dev = new WifiP2pDevice();
+        dev.deviceName = "jonathon";
+        dev.deviceAddress = "3";
+        wiFiP2pService3.device = dev;
+        addNeighborHex(wiFiP2pService3);
+
+        WiFiP2pService wiFiP2pService4 = new WiFiP2pService();
+        dev = new WifiP2pDevice();
+        dev.deviceName = "rolph";
+        dev.deviceAddress = "4";
+        wiFiP2pService4.device = dev;
+        addNeighborHex(wiFiP2pService4);
     }
 
     public void hexClicked(View v) {
@@ -223,15 +251,64 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
 
     private void showHex(int id, WiFiP2pService service) {
 
+
+        Log.d(TAG, id+": "+service.device.deviceName);
+        // Log.d(TAG, "photo: "+getPhotoUriFromEmail(service.device.deviceName+"@gmail.com"));
+
+
+
+        ImageView thisHexPerson = null;
+        ImageView thisHex = null;
+
+        if (id==1 || id==3) {
+            rotatePeer = new RotateAnimation(0, 360, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+        } else {
+            rotatePeer = new RotateAnimation(360, 0, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+        }
+        rotatePeer.setDuration(20000);
+        rotatePeer.setInterpolator(new LinearInterpolator());
+        rotatePeer.setRepeatCount(Animation.INFINITE);
+
         if (id==1) {
             mPeerHex1.setVisibility(View.VISIBLE);
+            thisHexPerson = ((ImageView)findViewById(R.id.main_hex1_person));
+            thisHex = ((ImageView)findViewById(R.id.main_hex1));
         } else if (id==2) {
             mPeerHex2.setVisibility(View.VISIBLE);
+            thisHexPerson = ((ImageView)findViewById(R.id.main_hex2_person));
+            thisHex = ((ImageView)findViewById(R.id.main_hex2));
         } else if (id==3) {
             mPeerHex3.setVisibility(View.VISIBLE);
+            thisHexPerson = ((ImageView)findViewById(R.id.main_hex3_person));
+            thisHex = ((ImageView)findViewById(R.id.main_hex3));
         } else if (id==4) {
             mPeerHex4.setVisibility(View.VISIBLE);
+            thisHexPerson = ((ImageView)findViewById(R.id.main_hex4_person));
+            thisHex = ((ImageView)findViewById(R.id.main_hex4));
         }
+
+        if (thisHex != null) {
+            thisHex.setBackgroundResource(R.drawable.hexnone);
+            thisHex.startAnimation(rotatePeer);
+        }
+
+        if (thisHexPerson != null) {
+            thisHexPerson.setImageResource(R.drawable.person);
+
+        }
+
+
+    }
+
+    public Uri getContactPhotoUri(long contactId) {
+        Uri photoUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactId);
+        photoUri = Uri.withAppendedPath(photoUri, ContactsContract.Contacts.Photo.CONTENT_DIRECTORY);
+        return photoUri;
+    }
+
+    public void getPhotoFromEmail(String email) {
+
+
     }
 
     private void hideAllHexes() {
@@ -275,14 +352,18 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
         searchQuery = searchEditText.getText().toString();
         Log.d(TAG, "searching "+searchQuery);
 
+         connectToNextPeer();
+    }
+
+    public void connectToNextPeer() {
         try {
-            servicesList.onListItemClick(servicesList.getListView(), null, connectedToHex, -1);
+            servicesList.onListItemClick(servicesList.getListView(), null, connectedToHex++, -1);
+            if (connectedToHex>3) {
+                connectedToHex = 0;
+            }
         } catch (Exception e) {
-            // no possible link found
             Log.d(TAG, "no link found. "+e.getMessage());
         }
-
-
     }
 
     /**
@@ -427,7 +508,7 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
         });
     }
 
-    private final static String DELIMETER = "````";
+    private final static String DELIMETER = "7227227227";
     @Override
     public boolean handleMessage(Message msg) {
         switch (msg.what) {
@@ -599,5 +680,24 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
     public void appendStatus(String status) {
         String current = statusTxtView.getText().toString();
         statusTxtView.setText(current + "\n" + status);
+    }
+
+    public void hex1Clicked(View v) {
+        Toast.makeText(getApplicationContext(), serviceArrayList.get(0).device.deviceName, Toast.LENGTH_SHORT).show();
+    }
+
+    public void hex2Clicked(View v) {
+        Toast.makeText(getApplicationContext(), serviceArrayList.get(1).device.deviceName, Toast.LENGTH_SHORT).show();
+
+    }
+
+    public void hex3Clicked(View v) {
+        Toast.makeText(getApplicationContext(), serviceArrayList.get(2).device.deviceName, Toast.LENGTH_SHORT).show();
+
+    }
+
+    public void hex4Clicked(View v) {
+        Toast.makeText(getApplicationContext(), serviceArrayList.get(3).device.deviceName, Toast.LENGTH_SHORT).show();
+
     }
 }

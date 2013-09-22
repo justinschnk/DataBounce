@@ -65,7 +65,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="GO ONLINE!"
-                style="@android:style/TextAppearance.Holo.Large.Inverse"
+                style="@android:style/TextAppearance.Holo.Large"
                 android:layout_centerInParent="true"
                 />
     </RelativeLayout>
@@ -75,13 +75,22 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="170dp"
             android:layout_marginLeft="60dp"
+            android:onClick="hex1Clicked"
             android:id="@+id/main_hex_rel1"
             android:visibility="invisible">
         <ImageView
                 android:id="@+id/main_hex1"
+                android:layout_margin="5dp"
+                android:layout_width="80dp"
+                android:layout_height="86dp"
+                android:background="@drawable/hexplain"
+                android:layout_centerInParent="true"
+                />
+        <ImageView
+                android:id="@+id/main_hex1_person"
                 android:layout_width="80dp"
                 android:layout_height="80dp"
-                android:background="@drawable/hexplain"
+                android:background="@drawable/person"
                 android:layout_centerInParent="true"
                 />
     </RelativeLayout>
@@ -92,13 +101,22 @@
             android:layout_marginTop="170dp"
             android:layout_alignParentRight="true"
             android:layout_marginRight="60dp"
+            android:onClick="hex2Clicked"
             android:id="@+id/main_hex_rel2"
             android:visibility="invisible">
         <ImageView
                 android:id="@+id/main_hex2"
+                android:layout_margin="5dp"
+                android:layout_width="80dp"
+                android:layout_height="86dp"
+                android:background="@drawable/hexplain"
+                android:layout_centerInParent="true"
+                />
+        <ImageView
+                android:id="@+id/main_hex2_person"
                 android:layout_width="80dp"
                 android:layout_height="80dp"
-                android:background="@drawable/hexplain"
+                android:background="@drawable/person"
                 android:layout_centerInParent="true"
                 />
     </RelativeLayout>
@@ -106,16 +124,25 @@
     <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="320dp"
+            android:layout_marginTop="330dp"
             android:layout_alignParentRight="true"
             android:layout_marginRight="60dp"
+            android:onClick="hex3Clicked"
             android:id="@+id/main_hex_rel3"
             android:visibility="invisible">
         <ImageView
                 android:id="@+id/main_hex3"
+                android:layout_margin="5dp"
+                android:layout_width="80dp"
+                android:layout_height="86dp"
+                android:background="@drawable/hexplain"
+                android:layout_centerInParent="true"
+                />
+        <ImageView
+                android:id="@+id/main_hex3_person"
                 android:layout_width="80dp"
                 android:layout_height="80dp"
-                android:background="@drawable/hexplain"
+                android:background="@drawable/person"
                 android:layout_centerInParent="true"
                 />
     </RelativeLayout>
@@ -123,15 +150,24 @@
     <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="320dp"
+            android:layout_marginTop="330dp"
             android:layout_marginLeft="60dp"
+            android:onClick="hex4Clicked"
             android:id="@+id/main_hex_rel4"
             android:visibility="invisible">
         <ImageView
                 android:id="@+id/main_hex4"
+                android:layout_margin="5dp"
+                android:layout_width="80dp"
+                android:layout_height="86dp"
+                android:background="@drawable/hexplain"
+                android:layout_centerInParent="true"
+                />
+        <ImageView
+                android:id="@+id/main_hex4_person"
                 android:layout_width="80dp"
                 android:layout_height="80dp"
-                android:background="@drawable/hexplain"
+                android:background="@drawable/person"
                 android:layout_centerInParent="true"
                 />
     </RelativeLayout>
@@ -140,6 +176,7 @@
         android:id="@+id/status_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:alpha="0.1"
         android:layout_alignParentBottom="true" >
     </TextView>
 

@@ -55,6 +55,7 @@ public class LoginActivity extends Activity {
         TelephonyManager tMgr = (TelephonyManager) getApplicationContext().getSystemService(Context.TELEPHONY_SERVICE);
         String mPhoneNumber = tMgr.getLine1Number();
         String contactId = fetchContactIdFromPhoneNumber(mPhoneNumber);
+        Log.d("wifidirectdemo", "contact id is "+contactId);
         Uri uri = getPhotoUri(Long.parseLong(contactId));
         badge.assignContactUri(uri);
         final Bitmap bitmap = loadContactPhoto(getContentResolver(), Long.parseLong(contactId));
