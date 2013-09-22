@@ -31,6 +31,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
+import android.webkit.WebView;
 import android.widget.*;
 
 import com.example.android.wifidirect.discovery.WiFiChatFragment.MessageTarget;
@@ -548,23 +549,15 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
                     String data = splitStr[3];
                     Log.d(TAG, "just got HTML data from "+from+": "+data);
 
-                    File f = new File(getApplicationContext().getFilesDir(), "index.html");
                     if (meta.equals("GET") && !urlreq.equals("_")) {
+                        Log.d(TAG, "about to download website");
                         new DownloadWebsiteTask(from, urlreq, meta, data).execute(urlreq);
-                    } else if (meta.equals("RESP")) {
+                    } else if (!data.equals(" ")) {
+                        Log.d(TAG, "about to display webview");
+                        WebView webView = (WebView) findViewById(R.id.website);
+                        webView.loadData(data, "text/html", null);
+                        webView.setVisibility(View.VISIBLE);
 
-                        try {
-                            FileWriter out = new FileWriter(f);
-                            out.write(data);
-                            out.close();
-                        } catch (IOException e) {
-                            Log.d(TAG, "IOException, "+e);
-                        }
-
-                        Intent intent = new Intent(Intent.ACTION_VIEW);
-                        Uri uridata = Uri.parse(f.getAbsolutePath());
-                        intent.setData(uridata);
-                        startActivity(intent);
                     }
                 }
 
