@@ -631,6 +631,8 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
         public void onPostExecute(String result) {
             if (result != null) {
 
+                Log.d(TAG, result);
+
                 StringBuilder message = new StringBuilder();
                 message.append(username);
                 message.append(DELIMETER);
