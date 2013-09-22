@@ -124,7 +124,7 @@
     <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="330dp"
+            android:layout_marginTop="340dp"
             android:layout_alignParentRight="true"
             android:layout_marginRight="60dp"
             android:onClick="hex3Clicked"
@@ -150,7 +150,7 @@
     <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="330dp"
+            android:layout_marginTop="340dp"
             android:layout_marginLeft="60dp"
             android:onClick="hex4Clicked"
             android:id="@+id/main_hex_rel4"

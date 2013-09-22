@@ -170,34 +170,6 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
         username = getIntent().getStringExtra("username");
 
 
-        WiFiP2pService wiFiP2pService = new WiFiP2pService();
-        WifiP2pDevice dev = new WifiP2pDevice();
-        dev.deviceName = "raytray25";
-        dev.deviceAddress = "1";
-        wiFiP2pService.device = dev;
-        addNeighborHex(wiFiP2pService);
-
-        WiFiP2pService wiFiP2pService2 = new WiFiP2pService();
-        dev = new WifiP2pDevice();
-        dev.deviceName = "marisa";
-        dev.deviceAddress = "2";
-        wiFiP2pService2.device = dev;
-        addNeighborHex(wiFiP2pService2);
-
-        WiFiP2pService wiFiP2pService3 = new WiFiP2pService();
-        dev = new WifiP2pDevice();
-        dev.deviceName = "jonathon";
-        dev.deviceAddress = "3";
-        wiFiP2pService3.device = dev;
-        addNeighborHex(wiFiP2pService3);
-
-        WiFiP2pService wiFiP2pService4 = new WiFiP2pService();
-        dev = new WifiP2pDevice();
-        dev.deviceName = "rolph";
-        dev.deviceAddress = "4";
-        wiFiP2pService4.device = dev;
-        addNeighborHex(wiFiP2pService4);
-
 
         internet = getIntent().getBooleanExtra("internet",false);
 
@@ -380,10 +352,37 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
 
     public void connectToNextPeer() {
         try {
+            View v = null;
+            Animation a = null;
+            if (connectedToHex == 0) {
+                v = findViewById(R.id.main_hex1);
+                a = findViewById(R.id.main_hex1).getAnimation();
+            }
+            if (connectedToHex == 1) {
+                v = findViewById(R.id.main_hex2);
+                a = findViewById(R.id.main_hex2).getAnimation();
+            }
+            if (connectedToHex == 2) {
+                v = findViewById(R.id.main_hex3);
+                a = findViewById(R.id.main_hex3).getAnimation();
+            }
+            if (connectedToHex == 3) {
+                v = findViewById(R.id.main_hex4);
+                a = findViewById(R.id.main_hex4).getAnimation();
+            }
+
+            if (a != null && v!=null) {
+                v.setAnimation(null);
+                a.setDuration(1000);
+                v.startAnimation(a);
+            }
+
+
             servicesList.onListItemClick(servicesList.getListView(), null, connectedToHex++, -1);
             if (connectedToHex>3) {
                 connectedToHex = 0;
             }
+
         } catch (Exception e) {
             Log.d(TAG, "no link found. "+e.getMessage());
         }
