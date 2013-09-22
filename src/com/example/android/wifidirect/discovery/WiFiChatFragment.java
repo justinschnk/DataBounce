@@ -62,6 +62,14 @@ public class WiFiChatFragment extends Fragment {
         chatManager = obj;
     }
 
+    public void write(byte[] buffer) {
+        chatManager.write(buffer);
+    }
+
+    public ChatManager getChatManager() {
+        return chatManager;
+    }
+
     public void pushMessage(String readMessage) {
         adapter.add(readMessage);
         adapter.notifyDataSetChanged();

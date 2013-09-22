@@ -6,6 +6,7 @@ import android.app.Fragment;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
+import android.graphics.*;
 import android.net.wifi.WpsInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
@@ -18,6 +19,7 @@ import android.net.wifi.p2p.WifiP2pManager.DnsSdServiceResponseListener;
 import android.net.wifi.p2p.WifiP2pManager.DnsSdTxtRecordListener;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceInfo;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -33,8 +35,16 @@ import android.widget.*;
 import com.example.android.wifidirect.discovery.WiFiChatFragment.MessageTarget;
 import com.example.android.wifidirect.discovery.WiFiDirectServicesList.DeviceClickListener;
 import com.example.android.wifidirect.discovery.WiFiDirectServicesList.WiFiDevicesAdapter;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.StatusLine;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -65,6 +75,8 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
     public static final int MY_HANDLE = 0x400 + 2;
     private WifiP2pManager manager;
 
+    private int connectedToHex = 0;
+
     static final int SERVER_PORT = 4545;
 
     private final IntentFilter intentFilter = new IntentFilter();
@@ -87,8 +99,11 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
     ImageView mMainHexImg;
     RotateAnimation rotate;
 
+    Bitmap badge;
+    String username;
+
     private final static int INITIAL_STATE = 0;
-    private final static int SEARCH_STATE = 0;
+    private final static int SEARCH_STATE = 1;
     int mState = INITIAL_STATE;
 
     public Handler getHandler() {
@@ -140,18 +155,48 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
         mPeerHex3 = (RelativeLayout)findViewById(R.id.main_hex_rel3);
         mPeerHex4 = (RelativeLayout)findViewById(R.id.main_hex_rel4);
 
+
+        badge = (Bitmap) getIntent().getParcelableExtra("badge");
+        Log.d(TAG, "bitmap is "+badge);
+        
+        username = getIntent().getStringExtra("username");
     }
 
     public void hexClicked(View v) {
         // Move the hex to the center
         if (mState == INITIAL_STATE) {
+            mMainHexImg.setImageBitmap(getCroppedBitmap(badge));
             mMainHexImg.setAnimation(null);
+            ((TextView)findViewById(R.id.internet_txt)).setVisibility(View.INVISIBLE);
             Animation centerAnim = AnimationUtils.loadAnimation(this, R.anim.center);
             v.startAnimation(centerAnim);
             v.setClickable(false);
             ((LinearLayout)findViewById(R.id.search_layout)).setVisibility(View.VISIBLE);
             mState = SEARCH_STATE;
+            updateNeighborHexes();
         }
+    }
+
+    public Bitmap getCroppedBitmap(Bitmap bitmap) {
+        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
+                bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(output);
+
+        final int color = 0xff424242;
+        final Paint paint = new Paint();
+        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+
+        paint.setAntiAlias(true);
+        canvas.drawARGB(0, 0, 0, 0);
+        paint.setColor(color);
+        // canvas.drawRoundRect(rectF, roundPx, roundPx, paint);
+        canvas.drawCircle(bitmap.getWidth() / 2, bitmap.getHeight() / 2,
+                bitmap.getWidth() / 2, paint);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawBitmap(bitmap, rect, rect, paint);
+        //Bitmap _bmp = Bitmap.createScaledBitmap(output, 60, 60, false);
+        //return _bmp;
+        return output;
     }
 
     ArrayList<WiFiP2pService> serviceArrayList = new ArrayList<WiFiP2pService>();
@@ -160,6 +205,7 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
             serviceArrayList.add(service);
         }
 
+        Log.d(TAG, "in addNeighbor. State is "+mState);
         if (mState == SEARCH_STATE) {
             updateNeighborHexes();
         }
@@ -220,9 +266,19 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
         super.onStop();
     }
 
+
+    String searchQuery = "_";
     public void searchClicked(View v) {
-        Log.d(TAG, "search clicked");
-        String searchQuery = searchEditText.getText().toString();
+        searchQuery = searchEditText.getText().toString();
+        Log.d(TAG, "searching "+searchQuery);
+
+        try {
+            servicesList.onListItemClick(servicesList.getListView(), null, connectedToHex, -1);
+        } catch (Exception e) {
+            // no possible link found
+            Log.d(TAG, "no link found. "+e.getMessage());
+        }
+
 
     }
 
@@ -368,6 +424,7 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
         });
     }
 
+    private final static String DELIMETER = "````";
     @Override
     public boolean handleMessage(Message msg) {
         switch (msg.what) {
@@ -377,24 +434,101 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
                 String readMessage = new String(readBuf, 0, msg.arg1);
                 Log.d(TAG, readMessage);
                 (chatFragment).pushMessage("Buddy: " + readMessage);
-                String [] splitStr = readMessage.split(" ``` ");
+                String [] splitStr = readMessage.split(DELIMETER);
                 if (splitStr.length > 3) {
                     String from = splitStr[0];
-                    String datasize = splitStr[1];
-                    String urlreq = splitStr[2];
+                    String urlreq = splitStr[1];
+                    String meta = splitStr[2];
                     String data = splitStr[3];
                     Log.d(TAG, "just got HTML data from "+from+": "+data);
+
+                    if (meta.equals("GET") && !urlreq.equals("_")) {
+                        new DownloadWebsiteTask(from, urlreq, meta, data).execute(urlreq);
+                    } else if (meta.equals("RESP")) {
+
+                    }
                 }
 
                 break;
 
             case MY_HANDLE:
                 Object obj = msg.obj;
-                (chatFragment).setChatManager((ChatManager) obj);
+                chatFragment.setChatManager((ChatManager) obj);
+                StringBuilder message = new StringBuilder();
+                message.append(username);
+                message.append(DELIMETER);
+                message.append(searchQuery);
+                message.append(DELIMETER);
+                message.append("GET"); // meta
+                message.append(DELIMETER);
+                message.append(" "); // data
 
+                chatFragment.write(message.toString().getBytes());
         }
         return true;
     }
+
+    public class DownloadWebsiteTask extends AsyncTask<String, Void, String> {
+
+        String mFrom;
+        String mUrlreq;
+        String mMeta;
+        String mData;
+
+        public DownloadWebsiteTask(String from, String urlreq, String meta, String data) {
+            mFrom = from;
+            mUrlreq = urlreq;
+            mMeta = meta;
+            mData = data;
+        }
+
+        @Override
+        protected String doInBackground(String... uri) {
+            HttpClient httpclient = new DefaultHttpClient();
+            HttpResponse response;
+            String responseString = null;
+            try {
+                response = httpclient.execute(new HttpGet(uri[0]));
+                StatusLine statusLine = response.getStatusLine();
+                if(statusLine.getStatusCode() == HttpStatus.SC_OK) {
+                    ByteArrayOutputStream out = new ByteArrayOutputStream();
+                    response.getEntity().writeTo(out);
+                    out.close();
+                    responseString = out.toString();
+                } else {
+                    //Closes the connection.
+                    response.getEntity().getContent().close();
+                    throw new IOException(statusLine.getReasonPhrase());
+                }
+            } catch (ClientProtocolException e) {
+                //TODO Handle problems..
+            } catch (IOException e) {
+                //TODO Handle problems..
+            }
+            return responseString;
+        }
+
+        @Override
+        public void onPostExecute(String result) {
+            if (result != null) {
+
+                StringBuilder message = new StringBuilder();
+                message.append(username);
+                message.append(DELIMETER);
+                message.append(mUrlreq);
+                message.append(DELIMETER);
+                message.append("RESP"); // meta
+                message.append(DELIMETER);
+                message.append(result); // data
+
+                chatFragment.write(message.toString().getBytes());
+            } else {
+                Log.d(TAG, "post execute err. result is null");
+            }
+        }
+    }
+
+
 
     @Override
     public void onResume() {
@@ -436,9 +570,13 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
                     p2pInfo.groupOwnerAddress);
             handler.start();
         }
+
+
         chatFragment = new WiFiChatFragment();
-        getFragmentManager().beginTransaction()
-                .replace(R.id.container_root, chatFragment).commit();
+        getFragmentManager().beginTransaction().replace(R.id.container_root, chatFragment).commit();
+
+
+
         statusTxtView.setVisibility(View.GONE);
     }
 

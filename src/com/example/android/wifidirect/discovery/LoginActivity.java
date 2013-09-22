@@ -15,6 +15,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.View;
 import android.widget.*;
 import org.apache.http.HttpEntity;
@@ -57,7 +58,8 @@ public class LoginActivity extends Activity {
         String contactId = fetchContactIdFromPhoneNumber(mPhoneNumber);
         Uri uri = getPhotoUri(Long.parseLong(contactId));
         badge.assignContactUri(uri);
-        badge.setImageBitmap(loadContactPhoto(getContentResolver(), Long.parseLong(contactId)));
+        final Bitmap bitmap = loadContactPhoto(getContentResolver(), Long.parseLong(contactId));
+        badge.setImageBitmap(bitmap);
         //End Crazy Photo Trick
 //        badge.setImageURI(Uri.parse(ContactsContract.Profile.PHOTO_URI));
 //
@@ -78,7 +80,13 @@ public class LoginActivity extends Activity {
                 user = accounts[position];
                 username = user.name.substring(0,user.name.indexOf("@"));
                 progressSpinner.setVisibility(View.VISIBLE);
-                new CheckInternet().execute(null, null, null);
+                // new CheckInternet().execute(null, null, null);
+
+                Intent i = new Intent(getApplicationContext(), WiFiServiceDiscoveryActivity.class);
+                i.putExtra("username", username);
+                i.putExtra("badge", bitmap);
+                Log.d("wifidirectdemo", "bitmap on login activity is "+bitmap);
+                startActivity(i);
             }
         });
 

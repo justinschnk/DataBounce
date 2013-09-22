@@ -45,9 +45,7 @@ public class WiFiDirectServicesList extends ListFragment {
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         // TODO Auto-generated method stub
-        ((DeviceClickListener) getActivity()).connectP2p((WiFiP2pService) l
-                .getItemAtPosition(position));
-        ((TextView) v.findViewById(android.R.id.text2)).setText("Connecting");
+        ((DeviceClickListener) getActivity()).connectP2p((WiFiP2pService) l.getItemAtPosition(position));
 
     }
 
