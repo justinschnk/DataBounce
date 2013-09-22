@@ -5,14 +5,17 @@
     android:orientation="vertical" >
 
     <LinearLayout
+            android:id="@+id/search_layout"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:visibility="invisible"
             android:orientation="horizontal">
         <EditText
                 android:id="@+id/search"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="7"
+                android:imeOptions="actionGo"
                 android:hint="www.reddit.com"
                 />
 
@@ -25,6 +28,7 @@
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:layout_centerInParent="true"
+                android:onClick="searchClicked"
                 android:background="@android:drawable/ic_menu_search"
                 />
         </RelativeLayout>
@@ -34,6 +38,7 @@
 
     <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_below="@id/search_layout"
         android:id="@+id/container_root"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"

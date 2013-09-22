@@ -22,14 +22,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
+import android.widget.*;
 
 import com.example.android.wifidirect.discovery.WiFiChatFragment.MessageTarget;
 import com.example.android.wifidirect.discovery.WiFiDirectServicesList.DeviceClickListener;
@@ -79,6 +78,7 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
 
     private TextView statusTxtView;
 
+    EditText searchEditText;
     RelativeLayout mMainHex;
     RelativeLayout mPeerHex1;
     RelativeLayout mPeerHex2;
@@ -106,6 +106,7 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
         setContentView(R.layout.main);
         statusTxtView = (TextView) findViewById(R.id.status_text);
 
+
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
         intentFilter
@@ -122,6 +123,9 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
                 .add(R.id.container_root, servicesList, "services").commit();
 
 
+        searchEditText = ((EditText)findViewById(R.id.search));
+
+
         mMainHex = (RelativeLayout) findViewById(R.id.main_hex_rel);
         mMainHexImg = (ImageView) findViewById(R.id.main_hex);
 
@@ -130,6 +134,11 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
         rotate.setDuration(1000);
         rotate.setRepeatCount(Animation.INFINITE);
         mMainHexImg.startAnimation(rotate);
+
+        mPeerHex1 = (RelativeLayout)findViewById(R.id.main_hex_rel1);
+        mPeerHex2 = (RelativeLayout)findViewById(R.id.main_hex_rel2);
+        mPeerHex3 = (RelativeLayout)findViewById(R.id.main_hex_rel3);
+        mPeerHex4 = (RelativeLayout)findViewById(R.id.main_hex_rel4);
 
     }
 
@@ -140,6 +149,7 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
             Animation centerAnim = AnimationUtils.loadAnimation(this, R.anim.center);
             v.startAnimation(centerAnim);
             v.setClickable(false);
+            ((LinearLayout)findViewById(R.id.search_layout)).setVisibility(View.VISIBLE);
             mState = SEARCH_STATE;
         }
     }
@@ -208,6 +218,12 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
             });
         }
         super.onStop();
+    }
+
+    public void searchClicked(View v) {
+        Log.d(TAG, "search clicked");
+        String searchQuery = searchEditText.getText().toString();
+
     }
 
     /**
@@ -361,6 +377,15 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
                 String readMessage = new String(readBuf, 0, msg.arg1);
                 Log.d(TAG, readMessage);
                 (chatFragment).pushMessage("Buddy: " + readMessage);
+                String [] splitStr = readMessage.split(" ``` ");
+                if (splitStr.length > 3) {
+                    String from = splitStr[0];
+                    String datasize = splitStr[1];
+                    String urlreq = splitStr[2];
+                    String data = splitStr[3];
+                    Log.d(TAG, "just got HTML data from "+from+": "+data);
+                }
+
                 break;
 
             case MY_HANDLE:
